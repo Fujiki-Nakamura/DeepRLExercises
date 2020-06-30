@@ -6,3 +6,6 @@
 - [ ] make better models
 - [ ] try other environments
 - [ ] try other models
+
+### Resources
+- https://github.com/berkeleydeeprlcourse
