@@ -9,3 +9,6 @@
 
 ### Resources
 - https://github.com/berkeleydeeprlcourse
+
+### Notes
+- https://github.com/2017-fall-DL-training-program/Setup_tutorial/blob/master/OpenAI-gym-install.md
