@@ -144,7 +144,7 @@ def main(args):
 
         total_rewards.append(g)
         durations.append(t + 1)
-        writer.add_scalar('Return/Train', g, episode_i + 1)
+        writer.add_scalar('Return_{}/Train'.format(args.env_name), g, episode_i + 1)
 
         if (episode_i + 1) % args.save_every_x_episodes == 0:
             state_dict = {
@@ -157,8 +157,8 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-            '[{}] Episode {} Time {:.2f}s Duration {} Return {}'.format(
-                expid, episode_i + 1, time.time() - start_time, t + 1, g))
+            '[{}] Env {} Episode {} Time {:.2f}s Duration {} Return {}'.format(
+                expid, args.env_name, episode_i + 1, time.time() - start_time, t + 1, g))
 
     logger.info('Finished')
 
