@@ -6,9 +6,11 @@ import os
 import random
 import time
 
+import numpy as np
 import torch
 from torch.nn import functional as F
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
 
 import gym
 
@@ -29,7 +31,7 @@ def select_action(args, state, policy_net):
 
     if sample > eps_threshold:
         with torch.no_grad():
-            action = policy_net(state).max(dim=1)[1].view(1, 1)
+            action = policy_net(state.to(args.device)).max(dim=1)[1].view(1, 1)
             return action
     else:
         action = torch.tensor(
@@ -49,11 +51,11 @@ def train(args, policy_net, target_net, memory, optimizer):
         tuple(map(lambda s: s is not None, batch.next_state)),
         device=args.device, dtype=torch.bool)
     non_final_next_states = torch.cat(
-        [s for s in batch.next_state if s is not None])
+        [s for s in batch.next_state if s is not None]).to(args.device)
 
-    state_batch = torch.cat(batch.state)
-    action_batch = torch.cat(batch.action)
-    reward_batch = torch.cat(batch.reward)
+    state_batch = torch.cat(batch.state).to(args.device)
+    action_batch = torch.cat(batch.action).to(args.device)
+    reward_batch = torch.cat(batch.reward).to(args.device)
 
     state_action_values = policy_net(state_batch).gather(1, action_batch)
     next_state_values = torch.zeros(args.batch_size, device=args.device)
@@ -72,6 +74,7 @@ def train(args, policy_net, target_net, memory, optimizer):
 
 
 def main(args):
+    # logs
     expid = dt.datetime.now().strftime('%Y%m%d%H%M%S')
     args.logdir = os.path.join(args.logdir, expid)
     if not os.path.exists(args.logdir):
@@ -80,6 +83,13 @@ def main(args):
     logger = get_logger(os.path.join(args.logdir, 'main.log'))
     logger.info('Logging at {}'.format(args.logdir))
     logger.info(args)
+    writer = SummaryWriter(args.logdir)
+
+    # misc
+    random.seed(args.random_state)
+    os.environ['PYTHONHASHSEED'] = str(args.random_state)
+    np.random.seed(args.random_state)
+    torch.manual_seed(args.random_state)
 
     # env
     env = gym.make(args.env_name).unwrapped
@@ -96,7 +106,7 @@ def main(args):
 
     total_rewards = []
     durations = []
-    # img = plt.imshow(env.render(mode='rgb_array'))
+    elapsed_timesteps = 0
     for episode_i in range(args.n_episodes):
         start_time = time.time()
         g = 0
@@ -128,11 +138,13 @@ def main(args):
                 # episode_durations.append(t + 1)
                 # plot_durations()
                 break
-        if (episode_i + 1) % args.update_target_net_every_x_episodes == 0:
-            target_net.load_state_dict(policy_net.state_dict())
+            elapsed_timesteps += 1
+            if elapsed_timesteps % args.update_target_net_every_x_timesteps == 0:  # noqa
+                target_net.load_state_dict(policy_net.state_dict())
 
         total_rewards.append(g)
         durations.append(t + 1)
+        writer.add_scalar('Return/Train', g, episode_i + 1)
 
         if (episode_i + 1) % args.save_every_x_episodes == 0:
             state_dict = {
@@ -145,8 +157,8 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-            'Episode {} Time {:.2f}s Duration {} Return {}'.format(
-                episode_i + 1, time.time() - start_time, t + 1, g))
+            '[{}] Episode {} Time {:.2f}s Duration {} Return {}'.format(
+                expid, episode_i + 1, time.time() - start_time, t + 1, g))
 
     logger.info('Finished')
 
@@ -172,11 +184,12 @@ if __name__ == '__main__':
     parser.add_argument('--eps_end', type=float, default=0.1)
     parser.add_argument('--eps_decay', type=int, default=200)
     parser.add_argument('--exploration_steps', type=int, default=1000000)
-    parser.add_argument(
-        '--update_target_net_every_x_episodes', type=int, default=10000)
+    parser.add_argument('--update_target_net_every_x_episodes', type=int, default=10)  # noqa
+    parser.add_argument('--update_target_net_every_x_timesteps', type=int, default=10000)  # noqa
     parser.add_argument('--save_every_x_episodes', type=int, default=100)
     # misc
     parser.add_argument('--logdir', type=str, default='../logs')
+    parser.add_argument('--random_state', type=int, default=42)
 
     args, _ = parser.parse_known_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

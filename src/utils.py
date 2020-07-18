@@ -15,7 +15,7 @@ def get_state(args, observation, state=None, is_initial=False):
         state = np.append(
             state[1:, :, :], observation[np.newaxis, :, :], axis=0)
 
-    return torch.from_numpy(state).unsqueeze(0).to(args.device)
+    return torch.from_numpy(state).unsqueeze(0)
 
 
 def preprocess(observation, args):
