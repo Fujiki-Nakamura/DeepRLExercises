@@ -111,24 +111,26 @@ def main(args):
         start_time = time.time()
         g = 0
 
-        obs = preprocess(env.reset(), args)
-        state = get_state(args, obs, state=None, is_initial=True)
-
+        last_obs = env.reset()
+        obs = env.reset()
+        processed_obs = preprocess(obs, last_obs, args)
+        state = get_state(args, processed_obs, state=None, is_initial=True)
         for t in count():
             if not torch.cuda.is_available():
                 env.render()
+            last_obs = obs
             action = select_action(args, state, policy_net)
             # _action = _action_space[action.item()]
             _action = action.item()
             obs, reward, done, _ = env.step(_action)
-            obs = preprocess(obs, args=args)
+            processed_obs = preprocess(obs, last_obs, args=args)
             g += reward
             reward = torch.tensor([reward], device=args.device)
 
             if done:
                 next_state = None
             else:
-                next_state = get_state(args, obs, state)
+                next_state = get_state(args, processed_obs, state)
 
             memory.push(state, action, next_state, reward)
             state = next_state
