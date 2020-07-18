@@ -29,15 +29,18 @@ def select_action(args, state, policy_net):
     eps_threshold = args.eps_end + (args.eps_start - args.eps_end) / args.exploration_steps  # noqa
     steps_done += 1
 
-    if sample > eps_threshold:
-        with torch.no_grad():
-            action = policy_net(state.to(args.device)).max(dim=1)[1].view(1, 1)
-            return action
-    else:
-        action = torch.tensor(
-            [[random.randrange(args.n_actions)]],
-            device=args.device, dtype=torch.long)
-        return action
+    action = torch.tensor([[policy_net.last_action]], device=args.device, dtype=torch.long)
+    if steps_done % args.action_interval == 0:
+        if sample > eps_threshold:
+            with torch.no_grad():
+                action = policy_net(state.to(args.device)).max(dim=1)[1].view(1, 1)  # noqa
+        else:
+            action = torch.tensor(
+                [[random.randrange(args.n_actions)]],
+                device=args.device, dtype=torch.long)
+        policy_net.last_action = action.item()
+
+    return action
 
 
 def train(args, policy_net, target_net, memory, optimizer):
@@ -184,6 +187,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.00025)
     parser.add_argument('--momentum', type=float, default=0.95)
     # training
+    parser.add_argument('--action_interval', type=int, default=4)
     parser.add_argument('--n_episodes', type=int, default=12000)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--gamma', type=float, default=0.999)
