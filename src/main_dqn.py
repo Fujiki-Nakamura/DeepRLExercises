@@ -143,10 +143,14 @@ def main(args):
             elapsed_timesteps += 1
             if elapsed_timesteps % args.update_target_net_every_x_timesteps == 0:  # noqa
                 target_net.load_state_dict(policy_net.state_dict())
+                logger.info(
+                    '[{}] Env {} Episode {} ElapsedTimesteps {}'.format(
+                        expid, args.env_name, episode_i + 1, steps_done)
+                )
 
         total_rewards.append(g)
         durations.append(t + 1)
-        writer.add_scalar('Return_{}/Train'.format(args.env_name), g, episode_i + 1)
+        writer.add_scalar('{}/TotalReward/Train'.format(args.env_name), g, episode_i + 1)
 
         if (episode_i + 1) % args.save_every_x_episodes == 0:
             state_dict = {
@@ -159,8 +163,9 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-            '[{}] Env {} Episode {} Time {:.2f}s Duration {} Return {}'.format(
-                expid, args.env_name, episode_i + 1, time.time() - start_time, t + 1, g))
+            '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} TotalReward {}'.format(
+                expid, args.env_name,
+                episode_i + 1, steps_done, time.time() - start_time, t + 1, g))
 
     logger.info('Finished')
 

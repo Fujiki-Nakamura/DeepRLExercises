@@ -32,7 +32,7 @@ def save_checkpoint(state, episode, score, logdir):
 
 def get_logger(log_file):
     from logging import getLogger, FileHandler, StreamHandler
-    from logging import Formatter, DEBUG, ERROR, INFO
+    from logging import Formatter, DEBUG, ERROR, INFO  # noqa
     fh = FileHandler(log_file)
     fh.setLevel(INFO)
     sh = StreamHandler()
