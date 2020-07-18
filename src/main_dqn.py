@@ -27,7 +27,6 @@ def select_action(args, state, policy_net):
     sample = random.random()
     # eps_threshold = args.eps_end + (args.eps_start - args.eps_end) * math.exp(-1. * steps_done / args.eps_decay)  # noqa
     eps_threshold = args.eps_end + (args.eps_start - args.eps_end) / args.exploration_steps  # noqa
-    steps_done += 1
 
     action = torch.tensor([[policy_net.last_action]], device=args.device, dtype=torch.long)
     if steps_done % args.action_interval == 0:
@@ -77,6 +76,8 @@ def train(args, policy_net, target_net, memory, optimizer):
 
 
 def main(args):
+    global steps_done
+
     # logs
     expid = dt.datetime.now().strftime('%Y%m%d%H%M%S')
     args.logdir = os.path.join(args.logdir, expid)
@@ -109,7 +110,6 @@ def main(args):
 
     total_rewards = []
     durations = []
-    elapsed_timesteps = 0
     for episode_i in range(args.n_episodes):
         start_time = time.time()
         g = 0
@@ -121,6 +121,7 @@ def main(args):
         for t in count():
             if not torch.cuda.is_available():
                 env.render()
+            steps_done += 1
             last_obs = obs
             action = select_action(args, state, policy_net)
             # _action = _action_space[action.item()]
@@ -138,18 +139,19 @@ def main(args):
             memory.push(state, action, next_state, reward)
             state = next_state
 
-            train(args, policy_net, target_net, memory, optimizer)
+            if steps_done % args.train_interval == 0:
+                train(args, policy_net, target_net, memory, optimizer)
+            if steps_done % args.update_target_net_every_x_timesteps == 0:  # noqa
+                target_net.load_state_dict(policy_net.state_dict())
+                logger.info(
+                    '[{}] Env {} Episode {} Timesteps {} - Updated TargetNet'.format(
+                        expid, args.env_name, episode_i + 1, steps_done)
+                )
+
             if done:
                 # episode_durations.append(t + 1)
                 # plot_durations()
                 break
-            elapsed_timesteps += 1
-            if elapsed_timesteps % args.update_target_net_every_x_timesteps == 0:  # noqa
-                target_net.load_state_dict(policy_net.state_dict())
-                logger.info(
-                    '[{}] Env {} Episode {} ElapsedTimesteps {}'.format(
-                        expid, args.env_name, episode_i + 1, steps_done)
-                )
 
         total_rewards.append(g)
         durations.append(t + 1)
@@ -188,6 +190,7 @@ if __name__ == '__main__':
     parser.add_argument('--momentum', type=float, default=0.95)
     # training
     parser.add_argument('--action_interval', type=int, default=4)
+    parser.add_argument('--train_interval', type=int, default=4)
     parser.add_argument('--n_episodes', type=int, default=12000)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--gamma', type=float, default=0.999)
