@@ -40,7 +40,7 @@ def select_action(args, state, policy_net):
                 device=args.device, dtype=torch.long)
         policy_net.last_action = action.item()
 
-    return action
+    return action, eps_threshold
 
 
 def train(args, policy_net, target_net, memory, optimizer):
@@ -125,7 +125,7 @@ def main(args):
                 env.render()
             steps_done += 1
             last_obs = obs
-            action = select_action(args, state, policy_net)
+            action, epsilon = select_action(args, state, policy_net)
             # _action = _action_space[action.item()]
             _action = action.item()
             obs, reward, done, _ = env.step(_action)
@@ -170,9 +170,9 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-            '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} TotalReward {}'.format(
+                '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} Eps {:.2f} TotalReward {}'.format(  # noqa
                 expid, args.env_name,
-                episode_i + 1, steps_done, time.time() - start_time, t + 1, g))
+                episode_i + 1, steps_done, time.time() - start_time, t + 1, epsilon, g))
 
     logger.info('Finished')
 
