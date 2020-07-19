@@ -124,7 +124,7 @@ def main(args):
         for t in count():
             if not torch.cuda.is_available():
                 env.render()
-            steps_done += 1
+
             last_obs = obs
             action, epsilon = select_action(args, state, policy_net)
             # _action = _action_space[action.item()]
@@ -151,6 +151,7 @@ def main(args):
                         expid, args.env_name, episode_i + 1, steps_done)
                 )
 
+            steps_done += 1
             if done:
                 # episode_durations.append(t + 1)
                 # plot_durations()
