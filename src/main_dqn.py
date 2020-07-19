@@ -24,9 +24,10 @@ steps_done = 0
 def select_action(args, state, policy_net):
     global steps_done
 
-    sample = random.random()
+    eps_step = (args.eps_start - args.eps_end) / args.exploration_steps
+    eps_threshold = args.eps_start - eps_step * steps_done
+    eps_threshold = max(eps_threshold, args.eps_end)
     # eps_threshold = args.eps_end + (args.eps_start - args.eps_end) * math.exp(-1. * steps_done / args.eps_decay)  # noqa
-    eps_threshold = args.eps_end + (args.eps_start - args.eps_end) / args.exploration_steps  # noqa
 
     action = torch.tensor([[policy_net.last_action]], device=args.device, dtype=torch.long)
     r = random.random()
