@@ -83,6 +83,7 @@ def main(args):
     args.logdir = os.path.join(args.logdir, expid)
     if not os.path.exists(args.logdir):
         os.makedirs(args.logdir)
+    os.chmod(args.logdir, 0o777)
 
     logger = get_logger(os.path.join(args.logdir, 'main.log'))
     logger.info('Logging at {}'.format(args.logdir))
