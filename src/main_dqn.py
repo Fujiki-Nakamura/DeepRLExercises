@@ -29,8 +29,9 @@ def select_action(args, state, policy_net):
     eps_threshold = args.eps_end + (args.eps_start - args.eps_end) / args.exploration_steps  # noqa
 
     action = torch.tensor([[policy_net.last_action]], device=args.device, dtype=torch.long)
+    r = random.random()
     if steps_done % args.action_interval == 0:
-        if sample > eps_threshold:
+        if r > eps_threshold:
             with torch.no_grad():
                 action = policy_net(state.to(args.device)).max(dim=1)[1].view(1, 1)  # noqa
         else:
