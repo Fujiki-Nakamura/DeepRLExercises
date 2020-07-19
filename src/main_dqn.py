@@ -19,10 +19,11 @@ from nets import DQN, ReplayMemory, Transition
 
 
 steps_done = 0
+action_mode = None
 
 
 def select_action(args, state, policy_net):
-    global steps_done
+    global steps_done, action_mode
 
     eps_step = (args.eps_start - args.eps_end) / args.exploration_steps
     eps_threshold = args.eps_start - eps_step * steps_done
@@ -35,13 +36,15 @@ def select_action(args, state, policy_net):
         if r > eps_threshold:
             with torch.no_grad():
                 action = policy_net(state.to(args.device)).max(dim=1)[1].view(1, 1)  # noqa
+            action_mode = 'exploit'
         else:
             action = torch.tensor(
                 [[random.randrange(args.n_actions)]],
                 device=args.device, dtype=torch.long)
+            action_mode = 'explore'
         policy_net.last_action = action.item()
 
-    return action, eps_threshold
+    return action, eps_threshold, action_mode
 
 
 def train(args, policy_net, target_net, memory, optimizer):
@@ -126,7 +129,7 @@ def main(args):
                 env.render()
 
             last_obs = obs
-            action, epsilon = select_action(args, state, policy_net)
+            action, epsilon, action_mode = select_action(args, state, policy_net)
             # _action = _action_space[action.item()]
             _action = action.item()
             obs, reward, done, _ = env.step(_action)
@@ -172,9 +175,9 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-                '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} Eps {:.2f} TotalReward {}'.format(  # noqa
+                '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} Eps {:.2f} TotalReward {} ({})'.format(  # noqa
                 expid, args.env_name,
-                episode_i + 1, steps_done, time.time() - start_time, t + 1, epsilon, g))
+                episode_i + 1, steps_done, time.time() - start_time, t + 1, epsilon, g, action_mode))
 
     logger.info('Finished')
 
