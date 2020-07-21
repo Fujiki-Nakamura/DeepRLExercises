@@ -145,8 +145,7 @@ def main(args):
             memory.push(state, action, next_state, reward)
             state = next_state
 
-            if steps_done % args.train_interval == 0:
-                train(args, policy_net, target_net, memory, optimizer)
+            train(args, policy_net, target_net, memory, optimizer)
             if steps_done % args.update_target_net_every_x_timesteps == 0:  # noqa
                 target_net.load_state_dict(policy_net.state_dict())
                 logger.info(
@@ -185,7 +184,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # data
-    parser.add_argument('--env_name', type=str, default='Breakout-v0')
+    parser.add_argument('--env_name', type=str, default='BreakoutDeterministic-v4')
     parser.add_argument('--n_actions', type=int, default=0)
     parser.add_argument('--state_w', type=int, default=84)
     parser.add_argument('--state_h', type=int, default=84)
@@ -214,5 +213,9 @@ if __name__ == '__main__':
 
     args, _ = parser.parse_known_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    args.replay_memory_size = 1000000
+    args.action_interval = 1
+    args.batch_size = 32
 
     main(args)
