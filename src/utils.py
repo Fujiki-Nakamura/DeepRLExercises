@@ -19,7 +19,7 @@ def get_state(args, observation, state=None, is_initial=False):
 
 
 def preprocess(observation, last_observation, args):
-    observation = np.maximum(observation, last_observation)
+    # observation = np.maximum(observation, last_observation)
     observation = resize(rgb2gray(observation), (args.state_w, args.state_h))
     return observation.astype(np.float32).reshape(args.state_w, args.state_h)
 
