@@ -145,7 +145,8 @@ def main(args):
             memory.push(state, action, next_state, reward)
             state = next_state
 
-            train(args, policy_net, target_net, memory, optimizer)
+            if steps_done % args.train_interval == 0:
+                train(args, policy_net, target_net, memory, optimizer)
             if steps_done % args.update_target_net_every_x_timesteps == 0:  # noqa
                 target_net.load_state_dict(policy_net.state_dict())
                 logger.info(
