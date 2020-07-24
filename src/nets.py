@@ -35,8 +35,16 @@ class DQN(nn.Module):
         self.last_action = 0
 
         self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        nn.init.kaiming_normal_(self.conv1.weight, nonlinearity='relu')
+        nn.init.constant_(self.conv1.bias, 0)
+
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        nn.init.kaiming_normal_(self.conv2.weight, nonlinearity='relu')
+        nn.init.constant_(self.conv2.bias, 0)
+
         self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        nn.init.kaiming_normal_(self.conv3.weight, nonlinearity='relu')
+        nn.init.constant_(self.conv3.bias, 0)
 
         def calc_feature_map_size(size, kernel_size=5, stride=2):
             return (size - kernel_size) // stride + 1
@@ -48,7 +56,10 @@ class DQN(nn.Module):
             feat_h = calc_feature_map_size(feat_h)
 
         self.fc1 = nn.Linear(feat_w * feat_h * 64, 512)
+        nn.init.kaiming_normal_(self.fc1.weight, nonlinearity='relu')
+
         self.out = nn.Linear(512, n_outputs)
+        nn.init.kaiming_normal_(self.out.weight, nonlinearity='relu')
 
     def forward(self, x):
         bs = x.size(0)
