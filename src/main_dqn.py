@@ -76,8 +76,14 @@ def train(args, policy_net, target_net, memory, optimizer):
         non_final_next_states).max(1)[0].detach()
     expected_state_action_values = reward_batch + args.gamma * next_state_values
 
-    loss = F.smooth_l1_loss(
-        state_action_values, expected_state_action_values.unsqueeze(1))
+    if args.loss_name == 'smooth_l1_loss':
+        loss = F.smooth_l1_loss(
+            state_action_values, expected_state_action_values.unsqueeze(1))
+    elif args.loss_name == 'mse_loss':
+        loss = F.mse_loss(
+            state_action_values, expected_state_action_values.unsqueeze(1))
+    else:
+        raise NotImplementedError
 
     optimizer.zero_grad()
     loss.backward()
@@ -216,9 +222,17 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    # env/data
     args.env_name = 'BreakoutNoFrameskip-v4'
+    # args.env_name = 'PongNoFrameskip-v4'
     args.replay_memory_size = 1000000
+    # loss
+    args.loss_name = 'mse_loss'
+    args.lr = 1e-4
+    args.momentum = 0.
+    # training
     args.action_interval = 1
+    args.train_interval = 1
     args.batch_size = 32
     args.n_episodes = 5000000
 
