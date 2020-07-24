@@ -12,14 +12,21 @@ from torch.nn import functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
-import gym
-
-from utils import get_logger, get_state, preprocess, save_checkpoint
+from common.atari_wrappers import make_atari
+from utils import get_logger, save_checkpoint, wrap_atari_dqn
 from nets import DQN, ReplayMemory, Transition
 
 
 steps_done = 0
 action_mode = None
+
+
+def get_state(obs, args=None):
+    obs = np.asarray(obs)
+    obs = obs.transpose(2, 0, 1)  # -> (c, h, w)
+    obs = obs / 255.
+    state = torch.from_numpy(obs).type(torch.float).unsqueeze(0)
+    return state
 
 
 def select_action(args, state, policy_net):
@@ -28,7 +35,6 @@ def select_action(args, state, policy_net):
     eps_step = (args.eps_start - args.eps_end) / args.exploration_steps
     eps_threshold = args.eps_start - eps_step * steps_done
     eps_threshold = max(eps_threshold, args.eps_end)
-    # eps_threshold = args.eps_end + (args.eps_start - args.eps_end) * math.exp(-1. * steps_done / args.eps_decay)  # noqa
 
     action = torch.tensor([[policy_net.last_action]], device=args.device, dtype=torch.long)
     r = random.random()
@@ -102,7 +108,8 @@ def main(args):
     torch.manual_seed(args.random_state)
 
     # env
-    env = gym.make(args.env_name).unwrapped
+    env = make_atari(args.env_name)
+    env = wrap_atari_dqn(env)
     # model
     args.n_actions = env.action_space.n
     policy_net = DQN(args.state_h, args.state_w, args.n_actions).to(args.device)
@@ -120,27 +127,21 @@ def main(args):
         start_time = time.time()
         g = 0
 
-        last_obs = env.reset()
         obs = env.reset()
-        processed_obs = preprocess(obs, last_obs, args)
-        state = get_state(args, processed_obs, state=None, is_initial=True)
+        state = get_state(obs, args)
         for t in count():
             if not torch.cuda.is_available():
                 env.render()
 
-            last_obs = obs
             action, epsilon, action_mode = select_action(args, state, policy_net)
-            # _action = _action_space[action.item()]
-            _action = action.item()
-            obs, reward, done, _ = env.step(_action)
-            processed_obs = preprocess(obs, last_obs, args=args)
+            obs, reward, done, _ = env.step(action.item())
             g += reward
             reward = torch.tensor([reward], device=args.device)
 
             if done:
                 next_state = None
             else:
-                next_state = get_state(args, processed_obs, state)
+                next_state = get_state(obs, args)
 
             memory.push(state, action, next_state, reward)
             state = next_state
@@ -215,6 +216,7 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    args.env_name = 'BreakoutNoFrameskip-v4'
     args.replay_memory_size = 1000000
     args.action_interval = 1
     args.batch_size = 32

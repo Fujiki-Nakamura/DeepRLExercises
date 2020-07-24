@@ -6,6 +6,11 @@ from skimage.transform import resize
 import torch
 
 
+def wrap_atari_dqn(env):
+    from common.atari_wrappers import wrap_deepmind
+    return wrap_deepmind(env, frame_stack=True, scale=False)
+
+
 def get_state(args, observation, state=None, is_initial=False):
     if is_initial:
         state = np.stack(
