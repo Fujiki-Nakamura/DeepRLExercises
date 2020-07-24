@@ -151,7 +151,7 @@ def main(args):
             if steps_done % args.update_target_net_every_x_timesteps == 0:  # noqa
                 target_net.load_state_dict(policy_net.state_dict())
                 logger.info(
-                    '[{}] Env {} Episode {} Timesteps {} - Updated TargetNet'.format(
+                    '[{}] {} Episode {} Timesteps {} - Updated TargetNet'.format(
                         expid, args.env_name, episode_i + 1, steps_done)
                 )
 
