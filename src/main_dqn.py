@@ -163,7 +163,7 @@ def main(args):
 
         total_rewards.append(g)
         durations.append(t + 1)
-        writer.add_scalar('{}/TotalReward/Train'.format(args.env_name), g, episode_i + 1)
+        writer.add_scalar('{}/EpisodeReward/Train'.format(args.env_name), g, episode_i + 1)
 
         if (episode_i + 1) % args.save_every_x_episodes == 0:
             state_dict = {
@@ -176,9 +176,9 @@ def main(args):
             save_checkpoint(state_dict, episode_i, g, args.logdir)
 
         logger.info(
-                '[{}] Env {} Episode {} Timesteps {} Time {:.2f}s Duration {} Eps {:.2f} TotalReward {} ({})'.format(  # noqa
+                '[{}] {} Episode {} Timesteps {} Time {:.2f}s Dur. {} Reward {} Eps {:.4f}({})'.format(  # noqa
                 expid, args.env_name,
-                episode_i + 1, steps_done, time.time() - start_time, t + 1, epsilon, g, action_mode))
+                episode_i + 1, steps_done, time.time() - start_time, t + 1, g, epsilon, action_mode))
 
     logger.info('Finished')
 
@@ -220,5 +220,6 @@ if __name__ == '__main__':
     args.replay_memory_size = 1000000
     args.action_interval = 1
     args.batch_size = 32
+    args.n_episodes = 5000000
 
     main(args)
