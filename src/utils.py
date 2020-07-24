@@ -4,11 +4,22 @@ import numpy as np
 from skimage.color import rgb2gray
 from skimage.transform import resize
 import torch
+from torch import optim
 
 
 def wrap_atari_dqn(env):
     from common.atari_wrappers import wrap_deepmind
     return wrap_deepmind(env, frame_stack=True, scale=False)
+
+
+def get_optimizer(model, args):
+    if args.optim_name == 'Adam':
+        optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    elif args.optim_name == 'RMSprop':
+        optimizer = optim.RMSprop(model.parameters(), lr=args.lr, momentum=args.momentum)
+    else:
+        raise NotImplementedError
+    return optimizer
 
 
 def get_state(args, observation, state=None, is_initial=False):

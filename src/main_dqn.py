@@ -9,11 +9,10 @@ import time
 import numpy as np
 import torch
 from torch.nn import functional as F
-import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 from common.atari_wrappers import make_atari
-from utils import get_logger, save_checkpoint, wrap_atari_dqn
+from utils import get_logger, get_optimizer, save_checkpoint, wrap_atari_dqn
 from nets import DQN, ReplayMemory, Transition
 
 
@@ -123,8 +122,7 @@ def main(args):
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
     # optim
-    optimizer = optim.RMSprop(
-        policy_net.parameters(), lr=args.lr, momentum=args.momentum)
+    optimizer = get_optimizer(policy_net, args)
     memory = ReplayMemory(args.replay_memory_size)
 
     total_rewards = []
