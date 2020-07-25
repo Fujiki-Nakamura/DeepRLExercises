@@ -1,9 +1,9 @@
 ## DeepRLExercises
-### TODOs
-- [x] setup starter codes for DQN playing Pong-v0 (`notebooks/DQN.Pong.ipynb`)
-- [ ] make better models
-- [ ] try other environments
-- [ ] try other models
+### NOTE
+- `src/` contains codes for Deep Q Network solutions to Breakout, Atari.
+
+### Results
+- Breakout, Deep Q Network
 
 ### Resources
 - https://github.com/berkeleydeeprlcourse
