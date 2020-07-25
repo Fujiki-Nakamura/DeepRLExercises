@@ -226,11 +226,11 @@ if __name__ == '__main__':
     args.replay_memory_size = 1000000
     # loss
     args.loss_name = 'mse_loss'
-    args.optim_name = 'RMSprop'
+    # args.optim_name = 'RMSprop'
     args.lr = 1e-4
-    args.momentum = 0.
+    # args.momentum = 0.
     # args.loss_name = 'smooth_l1_loss'
-    # args.optim_name = 'Adam'
+    args.optim_name = 'Adam'
     # args.lr = 3e-5
     # training
     args.action_interval = 1
