@@ -221,8 +221,8 @@ if __name__ == '__main__':
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # env/data
-    args.env_name = 'BreakoutNoFrameskip-v4'
-    # args.env_name = 'PongNoFrameskip-v4'
+    # args.env_name = 'BreakoutNoFrameskip-v4'
+    args.env_name = 'PongNoFrameskip-v4'
     args.replay_memory_size = 1000000
     # loss
     # args.loss_name = 'mse_loss'
