@@ -5,7 +5,11 @@
 ### Results
 Breakout, Deep Q Network
 
+- trained for 28,400 episodes (although should be reported in number of frames the agent learned).
+- main modifications
+
 ![openaigym video 0 3350 video000000](https://user-images.githubusercontent.com/8359397/88448370-317e9c80-ce78-11ea-9081-5c914dd5841b.gif)
+![スクリーンショット 2020-07-25 13 14 59](https://user-images.githubusercontent.com/8359397/88448468-49a2eb80-ce79-11ea-83ee-bbaf182d5912.png)
 
 ### Resources
 - https://github.com/berkeleydeeprlcourse
