@@ -14,6 +14,11 @@
 
 #### Pong
 - Deep Q Network same as the Breakout
+- Bellow are figures of
+  - left & middle: DQN agent-learned behaviors. Finally, the agent seemed to learn to exploit the oponent behavior and "crack" the Pong game.
+  - right: learning curves (horizontal axis: episodes, vertical axis: total rewards in an episode)
+    - green line: SmoothL1Loss, Adam(3e-5). totally sames as the Breakout agent.
+    - gray line: MSELoss, RMSprop(lr=1e-4, momentum=0.)
 
 ![pong openaigym video 1 5121 video000000](https://user-images.githubusercontent.com/8359397/88469830-5d5d5900-cf30-11ea-9b02-94858104c0e7.gif)
 ![pong 2500-episodes openaigym video 0 6461 video000000](https://user-images.githubusercontent.com/8359397/88469833-60f0e000-cf30-11ea-80c1-a6196767e62b.gif)
