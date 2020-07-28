@@ -201,9 +201,9 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.00025)
     parser.add_argument('--momentum', type=float, default=0.95)
     # training
-    parser.add_argument('--action_interval', type=int, default=4)
-    parser.add_argument('--train_interval', type=int, default=4)
-    parser.add_argument('--n_episodes', type=int, default=12000)
+    parser.add_argument('--action_interval', type=int, default=1)
+    parser.add_argument('--train_interval', type=int, default=1)
+    parser.add_argument('--n_episodes', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--gamma', type=float, default=0.999)
     parser.add_argument('--eps_start', type=float, default=1.0)
@@ -219,23 +219,5 @@ if __name__ == '__main__':
 
     args, _ = parser.parse_known_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # env/data
-    # args.env_name = 'BreakoutNoFrameskip-v4'
-    args.env_name = 'PongNoFrameskip-v4'
-    args.replay_memory_size = 1000000
-    # loss
-    args.loss_name = 'mse_loss'
-    # args.optim_name = 'RMSprop'
-    args.lr = 1e-4
-    # args.momentum = 0.
-    # args.loss_name = 'smooth_l1_loss'
-    args.optim_name = 'Adam'
-    # args.lr = 3e-5
-    # training
-    args.action_interval = 1
-    args.train_interval = 1
-    args.batch_size = 32
-    args.n_episodes = 5000000
 
     main(args)
