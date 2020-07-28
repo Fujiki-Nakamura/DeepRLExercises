@@ -26,7 +26,7 @@ $ CUDA_VISIBLE_DEVICES=0 python main_dqn.py --env_name PongNoFrameskip-v4 --repl
 ### Pong
 - Deep Q Network same as the Breakout
 - Bellow are figures of
-  - left & middle: DQN agent-learned behaviors. Finally, the agent seemed to learn to exploit the oponent behavior and "crack" the Pong game.
+  - left & middle: DQN agent-learned behaviors. Finally, the agent seemed to learn to exploit the oponent behavior and "crack" the Pong game (middle).
   - right: learning curves (horizontal axis: episodes, vertical axis: total rewards in an episode)
     - green line: SmoothL1Loss, Adam(3e-5). totally sames as the Breakout agent.
     - gray line: MSELoss, RMSprop(lr=1e-4, momentum=0.)
