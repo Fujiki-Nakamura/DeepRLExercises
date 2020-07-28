@@ -1,4 +1,13 @@
 # DeepRLExercises
+
+## Usage
+- For example, to train an agent for Pong with GPU 0,
+```
+$ cd src/
+$ CUDA_VISIBLE_DEVICES=0 python main_dqn.py --env_name PongNoFrameskip-v4 --replay_memory_size 1000000 loss_name mse_loss --optim_name Adam --lr 1e-4 --batch_size 32
+
+```
+
 ## NOTE
 - `src/` contains codes for Deep Q Network solutions to Breakout, Atari.
 
